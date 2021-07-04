@@ -5,7 +5,7 @@ export default class Scene1 extends Phaser.Scene {
 
   preload() {
     this.load.spritesheet("player", "assets/Images/spritesheet player.png", {
-      frameWidth: 176,
+      frameWidth: 185,
       frameHeight: 320
     })
     
@@ -35,49 +35,90 @@ export default class Scene1 extends Phaser.Scene {
   }
 
   update() {
-    this.walk(2)
+    this.walk()
   }
 
-  walk(speed) {
+  walk() {
+    this.player.setVelocityX(0)
+    
     if(this.keys.a.isDown) {
       this.player.flipX = true
+      
       if(this.canExeAnim) {
         this.player.play("walk", true)
       }
-      this.player.x -= speed
+      
+      this.speed = -100
     }
     
     if(this.keys.d.isDown) {
       this.player.flipX = false
+      
       if(this.canExeAnim) {
         this.player.play("walk", true)
       }
-      this.player.x += speed
+      
+      this.speed = 100
     }
     
-    if(this.keys.a.isUp == this.keys.d.isUp == true) {
-      
-      if(this.canExeAnim) {
+    if (this.keys.a.isUp == this.keys.d.isUp == true) {
+    
+      this.speed = 0
+    
+      if (this.canExeAnim) {
         this.player.play("default", true)
       }
+    }
+    
+    this.player.body.setVelocityX(this.speed)
+    
+    if(this.keys.e.isDown && !this.bool) {
+      
+      this.bool = true
+      
+      this.player.play("dash", true)
+      
+      if(this.player.flipX == true) {
+        this.player.body.setVelocityX(-400)
+      }
+      else{
+        this.player.body.setVelocityX(400)
+      }
+    }
+    
+    if(this.keys.e.isUp) {
+      this.time.addEvent({
+        delay: 3000,
+        callback: function() {
+          this.bool = false
+        },
+        callbackScope: this,
+        loop: false
+      })
     }
   }
   
   jump() {
     if(this.keys.space.isDown) {
-      this.player.body.setVelocityY(200 * -1)
+      if(this.keys.e.isUp) {
+        this.player.body.setVelocityY(200 * -1)
       
-      this.player.play("jump", true)
+        this.player.play("jump", true)
       
-      this.canExeAnim = false
+        this.canExeAnim = false
+      }
     }
   }
   
   keys() {
     this.keys = {
       a: this.input.keyboard.addKey("A"),
+      
       d: this.input.keyboard.addKey("D"),
-      space: this.input.keyboard.addKey("SPACE")
+      
+      space: this.input.keyboard.addKey("SPACE"),
+      
+      e: this.input.keyboard.addKey("E")
     }
   }
   
@@ -108,6 +149,17 @@ export default class Scene1 extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("player", {
         start: 0,
         end: 0
+      }),
+      frameRate: 1,
+      repeat: 0,
+      hideOnComplete: false
+    })
+    
+    this.anims.create({
+      key: "dash",
+      frames: this.anims.generateFrameNumbers("player", {
+        start: 5,
+        end: 5
       }),
       frameRate: 1,
       repeat: 0,
